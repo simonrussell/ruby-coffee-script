@@ -34,6 +34,11 @@ module CoffeeScript
   end
 
   class << self
+    def setup!
+      require 'thread'
+      @mutex = Mutex.new
+    end
+
     def engine
     end
 
@@ -55,7 +60,11 @@ module CoffeeScript
         options[:bare] = false
       end
 
-      Source.context.call("CoffeeScript.compile", script, options)
+      @mutex.synchronize do
+        Source.context.call("CoffeeScript.compile", script, options)
+      end
     end
   end
 end
+
+CoffeeScript.setup!
